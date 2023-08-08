@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Mantenimientos.Modelo;
+using Mantenimientos.Modelo.Dao;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -12,6 +14,8 @@ namespace Mantenimientos
 {
     public partial class formEmpleado : Form, IContract
     {
+        EmpleadoDao empDao = new EmpleadoDao();
+
         public formEmpleado()
         {
             InitializeComponent();
@@ -19,7 +23,7 @@ namespace Mantenimientos
 
         private void btnNuevo_Click(object sender, EventArgs e)
         {
-
+            txtEmpleado.Text = Convert.ToString(empDao.Id());
             ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
             // Habilitamos/Deshabilitamos botones
             ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -43,7 +47,7 @@ namespace Mantenimientos
 
         private void btnEditar_Click(object sender, EventArgs e)
         {
-
+            
             ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
             // Habilitamos/Deshabilitamos botones
             ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -89,7 +93,8 @@ namespace Mantenimientos
             ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
             // Asignamos los valores de los textbox a la clase Empleado
             ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-            Empleado em = new Empleado();
+            Modelo.Empleado em = new Modelo.Empleado();
+            EmpleadoDao empDao = new EmpleadoDao();
             DataTable dt = new DataTable();
 
             if (txtEmpleado.Text == "" )
@@ -99,21 +104,37 @@ namespace Mantenimientos
             {
                 em.IdEmpleado = Convert.ToInt32(txtEmpleado.Text);
             }
-            em.Nombres      = txtNombres.Text;
+            em.Nombre      = txtNombres.Text;
             em.Apellidos    = txtApellidos.Text;
             em.Direccion    = txtDireccion.Text;
             em.Telefono     = txtTelefono.Text;
             em.Email        = txtEmail.Text;
 
+            dt = empDao.ConsultById(em.IdEmpleado);
+
+            if(dt.Rows.Count > 0) 
+            {
+                empDao.Update(em);
+                MessageBox.Show("Datos actualizados", "Mensaje", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            else 
+            { 
+                empDao.Insert(em);
+                MessageBox.Show("Datos grabados", "Mensaje", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+
+            Limpiar_campos();
+
+
             ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
             // Verificamos si ya existe el registro en la BD
             ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-            dt = em.Consultar(em.IdEmpleado);
+            //dt = em.Consultar(em.IdEmpleado);
 
             ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
             // Si existe el empleado entonces actualizamos los datos
             ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-            if (dt.Rows.Count > 0)
+            /*if (dt.Rows.Count > 0)
             {
                 if (em.Actualizar(em) > 0)
                 {
@@ -139,7 +160,7 @@ namespace Mantenimientos
                     MessageBox.Show("No se grabaron los datos", "Mensaje", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
                 Limpiar_campos();
-            }
+            }*/
 
 
         }
@@ -189,13 +210,13 @@ namespace Mantenimientos
             txtEmail.Enabled        = false;
         }
 
-        public void Empleado_Mostrar(Empleado em)
+        public void Empleado_Mostrar(Modelo.Empleado em)
         {
             ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
             //Asignamos valores de la clase a los textbox desde una forma externa
             ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
             txtEmpleado.Text    = Convert.ToString(em.IdEmpleado);
-            txtNombres.Text     = em.Nombres;
+            txtNombres.Text     = em.Nombre;
             txtApellidos.Text   = em.Apellidos;
             txtDireccion.Text   = em.Direccion;
             txtTelefono.Text    = em.Telefono;
@@ -223,19 +244,13 @@ namespace Mantenimientos
             string strMsj = "Está seguro de eliminar el empleado [" + Convert.ToString(txtEmpleado.Text) + "] "
                 +  Convert.ToString(txtNombres.Text) + " " + Convert.ToString(txtApellidos.Text) + " ?";
 
-            Empleado em = new Empleado();
-            
+            EmpleadoDao empDao = new EmpleadoDao();
+
             if (MessageBox.Show(strMsj, "validación", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
             {
-                if (em.Eliminar(txtEmpleado.Text) > 0)
-                {
-                    MessageBox.Show("Datos eliminados", "Mensaje", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                } else
-                {
-                    MessageBox.Show("No se pudo eliminar empleado", "Mensaje", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                }
+                empDao.Delete(Convert.ToInt16(txtEmpleado.Text));
+                MessageBox.Show("Datos eliminados", "Mensaje", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 Limpiar_campos();
-                
             }
         }
 

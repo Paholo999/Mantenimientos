@@ -10,5 +10,7 @@ namespace Mantenimientos
     {
         public static string strDescrip;
         public static string strSeleccion;
+        public static string strNombres;
+        public static string strApellidos;
     }
 }

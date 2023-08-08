@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Mantenimientos.Modelo.Dao;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -13,6 +14,7 @@ namespace Mantenimientos
     public partial class formBusquedaTipo : Form
     {
         public IContract Contrato { get; set; }
+    
 
         public formBusquedaTipo()
         {
@@ -27,7 +29,8 @@ namespace Mantenimientos
         private void btnBuscar_Click(object sender, EventArgs e)
         {
             formInput formInput = new formInput();
-
+            formInput2 formInput2 = new formInput2();
+            
 
             ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
             // Se ha seleccionado la busqueda por codigo de empleado
@@ -42,14 +45,39 @@ namespace Mantenimientos
                     return;
                 }
 
-
-                DataTable dt   = new DataTable();
+                
+                Modelo.Empleado emlinq = new Modelo.Empleado();
+                EmpleadoDao empDao = new EmpleadoDao();
+                DataTable dtlinq   = new DataTable();
+                DataTable dt = new DataTable();
                 Empleado  em   = new Empleado();
+
 
                 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
                 // Se realiza la busqueda del empleado en la BD por IdEmpleado, si existe se muestran sus datos.
                 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-                em.IdEmpleado = Convert.ToInt32(Modulo.strDescrip);
+
+                dtlinq = empDao.ConsultById(Convert.ToInt32(Modulo.strDescrip));
+
+                if (dtlinq.Rows.Count > 0)
+                {
+                    emlinq.IdEmpleado = Convert.ToInt16(dtlinq.Rows[0]["Id"].ToString());
+                    emlinq.Nombre = dtlinq.Rows[0]["Nombres"].ToString();
+                    emlinq.Apellidos = dtlinq.Rows[0]["Apellidos"].ToString();
+                    emlinq.Direccion = dtlinq.Rows[0]["Direccion"].ToString();
+                    emlinq.Telefono = dtlinq.Rows[0]["Telefono"].ToString();
+                    emlinq.Email = dtlinq.Rows[0]["Email"].ToString();
+
+                    Contrato.Empleado_Mostrar(emlinq);
+
+                    this.Close();
+                }
+                else
+                {
+                    MessageBox.Show("Empleado no existe", "Mensaje", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+
+                /*em.IdEmpleado = Convert.ToInt32(Modulo.strDescrip);
 
                 dt = em.Consultar(em.IdEmpleado);
                 if (dt.Rows.Count > 0 )
@@ -65,7 +93,7 @@ namespace Mantenimientos
                 {
                     MessageBox.Show("Empleado no existe", "Mensaje", MessageBoxButtons.OK,MessageBoxIcon.Error);
 
-                }
+                }*/
             }
 
             ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -73,15 +101,23 @@ namespace Mantenimientos
             ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
             if (rdbDescripcion.Checked)
             {
-                Modulo.strDescrip = "";
-                formInput.lblMensaje.Text = "Ingrese Descripción";
-                formInput.ShowDialog();
 
-                if (Modulo.strDescrip.Trim() == "") {
+                Modulo.strNombres = "";
+                Modulo.strApellidos = "";
+                formInput2.lblMensaje1.Text = "Ingrese Nombres";
+                formInput2.lblMensaje2.Text = "Ingrese Apellidos";                
+                formInput2.ShowDialog();
+
+                if (Modulo.strNombres.Trim() == "") {
                     return;
                 }
-
-
+                if (Modulo.strApellidos.Trim() == "")
+                {
+                    return;
+                }
+                Modelo.Empleado emlinq = new Modelo.Empleado();
+                EmpleadoDao empDao = new EmpleadoDao();
+                DataTable dtlinq = new DataTable();
                 DataTable dt = new DataTable();
                 Empleado  em = new Empleado();
 
@@ -89,7 +125,26 @@ namespace Mantenimientos
                 // Se realiza la busqueda del empleado en la BD por nombres+apellidos, si existe se muestran sus datos.
                 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-                dt = em.Consultar_todos(" nombres + ' ' + apellidos like '%"+ Modulo.strDescrip + "%'");
+                dtlinq = empDao.ConsultByDescription(Modulo.strNombres, Modulo.strApellidos);
+
+                if (dtlinq.Rows.Count > 0)
+                {
+                    emlinq.IdEmpleado = Convert.ToInt16(dtlinq.Rows[0]["Id"].ToString());
+                    emlinq.Nombre = dtlinq.Rows[0]["Nombres"].ToString();
+                    emlinq.Apellidos = dtlinq.Rows[0]["Apellidos"].ToString();
+                    emlinq.Direccion = dtlinq.Rows[0]["Direccion"].ToString();
+                    emlinq.Telefono = dtlinq.Rows[0]["Telefono"].ToString();
+                    emlinq.Email = dtlinq.Rows[0]["Email"].ToString();
+
+                    Contrato.Empleado_Mostrar(emlinq);
+                    this.Close();
+                }
+                else
+                {
+                    MessageBox.Show("Empleado no existe", "Mensaje", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+
+                /*dt = em.Consultar_todos(" nombres + ' ' + apellidos like '%"+ Modulo.strDescrip + "%'");
                 if (dt.Rows.Count > 0)
                 {
                         Modulo.strSeleccion = "";
@@ -115,7 +170,7 @@ namespace Mantenimientos
                 } else
                 {
                     MessageBox.Show("No se encontró ninguna coincidencia.", "Mensaje", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                }
+                }*/
 
             }
 
@@ -124,10 +179,28 @@ namespace Mantenimientos
             ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
             if (rdbTodos.Checked) {
+
+                Modelo.Empleado emlinq = new Modelo.Empleado();
+                EmpleadoDao empDao = new EmpleadoDao();
+                DataTable dtlinq = new DataTable();
                 Empleado em = new Empleado();
                 DataTable dt = new DataTable();
-                dt = em.Consultar_todos("TODOS");
+                //dt = em.Consultar_todos("TODOS");
 
+                dtlinq = empDao.ConsultAll();
+
+                if (dtlinq.Rows.Count > 0)
+                {
+                    formListaEmpleado formListaEmpleado = new formListaEmpleado();
+                    formListaEmpleado.dgvLista.DataSource = dtlinq;
+                    formListaEmpleado.ShowDialog();
+                }
+                else
+                {
+                    MessageBox.Show("Empleado no existe", "Mensaje", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+
+                /*
                 if (dt.Rows.Count > 0)
                 {
                     Modulo.strSeleccion = "";
@@ -152,7 +225,7 @@ namespace Mantenimientos
                         Contrato.Empleado_Mostrar(em);
                         this.Close();
                     }
-                } 
+                } */
 
 
             }

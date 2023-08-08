@@ -9,6 +9,6 @@ namespace Mantenimientos
 {
     public interface IContract
     {
-        void Empleado_Mostrar(Empleado em);
+        void Empleado_Mostrar(Modelo.Empleado em);
     }
 }

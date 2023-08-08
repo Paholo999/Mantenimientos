@@ -42,9 +42,11 @@ namespace Mantenimientos
         private void dgvLista_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
         {
 
+        }
 
-            Modulo.strSeleccion = dgvLista.Rows[e.RowIndex].Cells[0].FormattedValue.ToString();
-            this.Close();
+        private void pictureBox1_Click(object sender, EventArgs e)
+        {
+
         }
     }
 }
